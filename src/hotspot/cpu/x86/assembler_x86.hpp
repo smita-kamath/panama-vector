@@ -541,6 +541,8 @@ class Assembler : public AbstractAssembler  {
     VEX_OPCODE_0F    = 0x1,
     VEX_OPCODE_0F_38 = 0x2,
     VEX_OPCODE_0F_3A = 0x3,
+    VEX_OPCODE_MAP5  = 0x5,
+    VEX_OPOCDE_MAP6  = 0x6,
     VEX_OPCODE_MASK  = 0x1F
   };
 
@@ -2186,6 +2188,7 @@ private:
   void vaddps(XMMRegister dst, XMMRegister nds, XMMRegister src, int vector_len);
   void vaddpd(XMMRegister dst, XMMRegister nds, Address src, int vector_len);
   void vaddps(XMMRegister dst, XMMRegister nds, Address src, int vector_len);
+  void evaddph(XMMRegister dst, XMMRegister nds, XMMRegister src, int vector_len);
 
   // Subtract Packed Floating-Point Values
   void subpd(XMMRegister dst, XMMRegister src);
@@ -2194,6 +2197,7 @@ private:
   void vsubps(XMMRegister dst, XMMRegister nds, XMMRegister src, int vector_len);
   void vsubpd(XMMRegister dst, XMMRegister nds, Address src, int vector_len);
   void vsubps(XMMRegister dst, XMMRegister nds, Address src, int vector_len);
+  void evsubph(XMMRegister dst, XMMRegister nds, XMMRegister src, int vector_len);
 
   // Multiply Packed Floating-Point Values
   void mulpd(XMMRegister dst, XMMRegister src);
@@ -2203,6 +2207,7 @@ private:
   void vmulps(XMMRegister dst, XMMRegister nds, XMMRegister src, int vector_len);
   void vmulpd(XMMRegister dst, XMMRegister nds, Address src, int vector_len);
   void vmulps(XMMRegister dst, XMMRegister nds, Address src, int vector_len);
+  void evmulph(XMMRegister dst, XMMRegister nds, XMMRegister src, int vector_len);
 
   void vfmadd231pd(XMMRegister dst, XMMRegister nds, XMMRegister src, int vector_len);
   void vfmadd231ps(XMMRegister dst, XMMRegister nds, XMMRegister src, int vector_len);
@@ -2216,6 +2221,7 @@ private:
   void vdivps(XMMRegister dst, XMMRegister nds, XMMRegister src, int vector_len);
   void vdivpd(XMMRegister dst, XMMRegister nds, Address src, int vector_len);
   void vdivps(XMMRegister dst, XMMRegister nds, Address src, int vector_len);
+  void evdivph(XMMRegister dst, XMMRegister nds, XMMRegister src, int vector_len);
 
   // Sqrt Packed Floating-Point Values
   void vsqrtpd(XMMRegister dst, XMMRegister src, int vector_len);

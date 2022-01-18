@@ -766,6 +766,7 @@ void VM_Version::get_processor_features() {
     _features &= ~CPU_AVX512_VNNI;
     _features &= ~CPU_AVX512_VBMI;
     _features &= ~CPU_AVX512_VBMI2;
+    _features &= ~CPU_AVX512_FP16;
   }
 
   if (UseAVX < 2)

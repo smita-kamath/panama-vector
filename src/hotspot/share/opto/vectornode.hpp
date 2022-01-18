@@ -166,6 +166,14 @@ public:
   virtual int Opcode() const;
 };
 
+//------------------------------AddVHFNode--------------------------------------
+// Vector add halffloat
+class AddVHFNode : public VectorNode {
+public:
+  AddVHFNode(Node * in1, Node * in2, const TypeVect * vt) : VectorNode(in1, in2, vt) {}
+  virtual int Opcode() const;
+};
+
 //------------------------------ReductionNode------------------------------------
 // Perform reduction of a vector
 class ReductionNode : public Node {
@@ -272,6 +280,14 @@ class SubVDNode : public VectorNode {
   virtual int Opcode() const;
 };
 
+//------------------------------SubVHFNode--------------------------------------
+// Vector sub halffloat
+class SubVHFNode : public VectorNode {
+public:
+  SubVHFNode(Node * in1, Node * in2, const TypeVect * vt) : VectorNode(in1, in2, vt) {}
+  virtual int Opcode() const;
+};
+
 //------------------------------MulVBNode--------------------------------------
 // Vector multiply byte
 class MulVBNode : public VectorNode {
@@ -327,6 +343,15 @@ class MulAddVS2VINode : public VectorNode {
     MulAddVS2VINode(Node* in1, Node* in2, const TypeVect* vt) : VectorNode(in1, in2, vt) {}
     virtual int Opcode() const;
 };
+
+//------------------------------MulVHFNode--------------------------------------
+// Vector mul halffloat
+class MulVHFNode : public VectorNode {
+public:
+  MulVHFNode(Node * in1, Node * in2, const TypeVect * vt) : VectorNode(in1, in2, vt) {}
+  virtual int Opcode() const;
+};
+
 
 //------------------------------FmaVDNode--------------------------------------
 // Vector multiply double
@@ -408,6 +433,14 @@ class DivVDNode : public VectorNode {
   virtual int Opcode() const;
 };
 
+//------------------------------DivVHFNode--------------------------------------
+// Vector div halffloat
+class DivVHFNode : public VectorNode {
+public:
+  DivVHFNode(Node * in1, Node * in2, const TypeVect * vt) : VectorNode(in1, in2, vt) {}
+  virtual int Opcode() const;
+};
+
 //------------------------------AbsVBNode--------------------------------------
 // Vector Abs byte
 class AbsVBNode : public VectorNode {
@@ -421,6 +454,14 @@ public:
 class AbsVSNode : public VectorNode {
 public:
   AbsVSNode(Node* in, const TypeVect* vt) : VectorNode(in, vt) {}
+  virtual int Opcode() const;
+};
+
+//------------------------------AbsVHFNode--------------------------------------
+// Vector Abs Halffloat
+class AbsVHFNode : public VectorNode {
+public:
+  AbsVHFNode(Node * in, const TypeVect * vt) : VectorNode(in, vt) {}
   virtual int Opcode() const;
 };
 
@@ -493,6 +534,14 @@ class NegVFNode : public VectorNode {
 class NegVDNode : public VectorNode {
  public:
   NegVDNode(Node* in, const TypeVect* vt) : VectorNode(in,vt) {}
+  virtual int Opcode() const;
+};
+
+//------------------------------NegVHFNode--------------------------------------
+// Vector Neg double
+class NegVHFNode : public VectorNode {
+public:
+  NegVHFNode(Node * in, const TypeVect * vt) : VectorNode(in, vt) {}
   virtual int Opcode() const;
 };
 

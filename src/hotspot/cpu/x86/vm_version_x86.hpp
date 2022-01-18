@@ -263,7 +263,9 @@ class VM_Version : public Abstract_VM_Version {
              avx512_4fmaps : 1,
                            : 10,
                  serialize : 1,
-                           : 17;
+                           : 8,
+               avx512_fp16 : 1,
+                           : 8;
     } bits;
   };
 
@@ -362,7 +364,8 @@ protected:
     decl(AVX512_VBMI2,      "avx512_vbmi2",      44) /* VBMI2 shift left double instructions */ \
     decl(AVX512_VBMI,       "avx512_vbmi",       45) /* Vector BMI instructions */ \
     decl(HV,                "hv",                46) /* Hypervisor instructions */ \
-    decl(SERIALIZE,         "serialize",         47) /* CPU SERIALIZE */
+    decl(SERIALIZE,         "serialize",         47) /* CPU SERIALIZE */ \
+    decl(AVX512_FP16,       "avx512_fp16",       48) /* Vector FP16 instructions*/ \
 
 #define DECLARE_CPU_FEATURE_FLAG(id, name, bit) CPU_##id = (1ULL << bit),
     CPU_FEATURE_FLAGS(DECLARE_CPU_FEATURE_FLAG)
@@ -598,6 +601,8 @@ enum Extended_Family {
           result |= CPU_AVX512_VBMI;
         if (_cpuid_info.sef_cpuid7_ecx.bits.avx512_vbmi2 != 0)
           result |= CPU_AVX512_VBMI2;
+        if (_cpuid_info.sef_cpuid7_edx.bits.avx512_fp16 != 0)
+          result |= CPU_AVX512_FP16;
       }
     }
     if (_cpuid_info.std_cpuid1_ecx.bits.hv != 0)
@@ -903,6 +908,7 @@ public:
   static bool supports_avx512_vbmi2() { return (_features & CPU_AVX512_VBMI2) != 0; }
   static bool supports_hv()           { return (_features & CPU_HV) != 0; }
   static bool supports_serialize()    { return (_features & CPU_SERIALIZE) != 0; }
+  static bool supports_avx512_fp16()  { return (_features & CPU_AVX512_FP16) != 0; }
 
   // Intel features
   static bool is_intel_family_core() { return is_intel() &&
