@@ -1382,6 +1382,8 @@ Assembler::Width widthForType(BasicType bt) {
   static address vector_long_shufflemask() { return StubRoutines::x86::vector_long_shuffle_mask(); }
   static address vector_32_bit_mask() { return StubRoutines::x86::vector_32_bit_mask(); }
   static address vector_64_bit_mask() { return StubRoutines::x86::vector_64_bit_mask(); }
+  static address vector_halffloat_signmask() { return StubRoutines::x86::vector_halffloat_sign_mask();}
+  static address vector_halffloat_signflip() { return StubRoutines::x86::vector_halffloat_sign_flip();}
 
 //=============================================================================
 const bool Matcher::match_rule_supported(int opcode) {
@@ -1973,6 +1975,17 @@ const bool Matcher::match_rule_supported_vector_masked(int opcode, int vlen, Bas
       return true;
 
     case Op_MaskAll:
+      return true;
+
+    case Op_AddVHF:
+    case Op_SubVHF:
+    case Op_MulVHF:
+    case Op_DivVHF:
+    case Op_AbsVHF:
+    case Op_NegVHF:
+      if(bt != T_SHORT && !VM_Version::supports_avx512_fp16()) {
+        return false;
+      }
       return true;
 
     default:
@@ -5277,6 +5290,18 @@ instruct vaddD_mem(vec dst, vec src, memory mem) %{
   ins_pipe( pipe_slow );
 %}
 
+// Halffloat vector add
+instruct vaddHF_reg(vec dst, vec src1, vec src2) %{
+  predicate(UseAVX > 2);
+  match(Set dst (AddVHF src1 src2));
+  format %{ "evaddph  $dst,$src1,$src2\t! add packedHF" %}
+  ins_encode %{
+    int vlen_enc = vector_length_encoding(this);
+    __ evaddph($dst$$XMMRegister, $src1$$XMMRegister, $src2$$XMMRegister, vlen_enc);
+  %}
+  ins_pipe( pipe_slow );
+%}
+
 // --------------------------------- SUB --------------------------------------
 
 // Bytes vector sub
@@ -5481,6 +5506,18 @@ instruct vsubD_mem(vec dst, vec src, memory mem) %{
   ins_encode %{
     int vlen_enc = vector_length_encoding(this);
     __ vsubpd($dst$$XMMRegister, $src$$XMMRegister, $mem$$Address, vlen_enc);
+  %}
+  ins_pipe( pipe_slow );
+%}
+
+// Halffloat vector sub
+instruct vsubHF_reg(vec dst, vec src1, vec src2) %{
+  predicate(UseAVX > 2);
+  match(Set dst (SubVHF src1 src2));
+  format %{ "evsubph  $dst,$src1,$src2\t! sub packedHF" %}
+  ins_encode %{
+    int vlen_enc = vector_length_encoding(this);
+    __ evsubph($dst$$XMMRegister, $src1$$XMMRegister, $src2$$XMMRegister, vlen_enc);
   %}
   ins_pipe( pipe_slow );
 %}
@@ -5814,6 +5851,18 @@ instruct vmulD_mem(vec dst, vec src, memory mem) %{
   ins_pipe( pipe_slow );
 %}
 
+//Halffloat vector mul
+instruct vmulHF_reg(vec dst, vec src1, vec src2) %{
+  predicate(UseAVX > 2);
+  match(Set dst (MulVHF src1 src2));
+  format %{ "vmulph  $dst,$src1,$src2\t! mul packedHF" %}
+  ins_encode %{
+    int vlen_enc = vector_length_encoding(this);
+    __ evmulph($dst$$XMMRegister, $src1$$XMMRegister, $src2$$XMMRegister, vlen_enc);
+  %}
+  ins_pipe( pipe_slow );
+%}
+
 instruct vcmov8F_reg(legVec dst, legVec src1, legVec src2, immI8 cop, cmpOp_vcmppd copnd) %{
   predicate(Matcher::vector_length(n) == 8);
   match(Set dst (CMoveVF (Binary copnd cop) (Binary src1 src2)));
@@ -5916,6 +5965,18 @@ instruct vdivD_mem(vec dst, vec src, memory mem) %{
   ins_encode %{
     int vlen_enc = vector_length_encoding(this);
     __ vdivpd($dst$$XMMRegister, $src$$XMMRegister, $mem$$Address, vlen_enc);
+  %}
+  ins_pipe( pipe_slow );
+%}
+
+// Halffloat vector div
+instruct vdivHF_reg(vec dst, vec src1, vec src2) %{
+  predicate(UseAVX > 2);
+  match(Set dst (DivVHF src1 src2));
+  format %{ "evdivph  $dst,$src1,$src2\t! div packedHF" %}
+  ins_encode %{
+    int vlen_enc = vector_length_encoding(this);
+    __ evdivph($dst$$XMMRegister, $src1$$XMMRegister, $src2$$XMMRegister, vlen_enc);
   %}
   ins_pipe( pipe_slow );
 %}
@@ -7630,6 +7691,30 @@ instruct vabsL_reg(vec dst, vec src) %{
     __ evpabsq($dst$$XMMRegister, $src$$XMMRegister, vlen_enc);
   %}
   ins_pipe( pipe_slow );
+%}
+
+// Half float abs
+instruct vabsHF_reg(vec dst, vec src) %{
+  predicate(UseAVX > 2);
+  match(Set dst (AbsVHF  src));
+  format %{ "vandps $dst,$src\t# $dst = |$src| abs packedHF" %}
+  ins_encode %{
+    int vlen_enc = vector_length_encoding(this);
+    __ vandps($dst$$XMMRegister, $src$$XMMRegister, ExternalAddress(vector_halffloat_signmask()), vlen_enc);
+  %}
+  ins_pipe( pipe_slow );
+%}
+
+// Halffloat neg
+instruct vnegHF_reg(vec dst, vec src) %{
+  predicate(UseAVX > 2);
+  match(Set dst (NegVHF src));
+  format %{"vxorps $dst, $src\t $dst = -$src neg packedHF" %}
+  ins_encode %{
+    int vlen_enc = vector_length_encoding(this);
+    __ vxorps($dst$$XMMRegister, $src$$XMMRegister, ExternalAddress(vector_halffloat_signflip()), vlen_enc);
+  %}
+  ins_pipe(pipe_slow);
 %}
 
 // --------------------------------- ABSNEG --------------------------------------

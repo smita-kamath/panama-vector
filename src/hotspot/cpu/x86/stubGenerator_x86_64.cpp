@@ -7690,6 +7690,8 @@ address generate_avx_ghash_processBlocks() {
     StubRoutines::x86::_vector_long_shuffle_mask = generate_vector_mask("vector_long_shuffle_mask", 0x0000000100000000);
     StubRoutines::x86::_vector_long_sign_mask = generate_vector_mask("vector_long_sign_mask", 0x8000000000000000);
     StubRoutines::x86::_vector_iota_indices = generate_iota_indices("iota_indices");
+    StubRoutines::x86::_vector_halffloat_sign_mask = generate_vector_fp_mask("vector_halffloat_sign_mask", 0x7FFF7FFF7FFF7FFF);
+    StubRoutines::x86::_vector_halffloat_sign_flip = generate_vector_fp_mask("vector_halffloat_sign_flip", 0x8000800080008000);
 
     // support for verify_oop (must happen after universe_init)
     if (VerifyOops) {

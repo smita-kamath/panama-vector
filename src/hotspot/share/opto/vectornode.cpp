@@ -252,6 +252,45 @@ int VectorNode::replicate_opcode(BasicType bt) {
   }
 }
 
+// Return the vector operator for the specified scalar operation
+// and vector length for half float
+int VectorNode::opcode(int sopc) {
+  switch (sopc) {
+    case Op_AddI:
+      return Op_AddVHF;
+    case Op_SubI:
+      return Op_SubVHF;
+    case Op_MulI:
+      return Op_MulVHF;
+    case Op_DivI:
+      return Op_DivVHF;
+    case Op_AbsI:
+      return Op_AbsVHF;
+    case Op_NegI:
+      return Op_NegVHF;
+    default:
+      return 0; // Unimplemented
+  }
+}
+
+// Make a vectornode for half float binary operation
+VectorNode* VectorNode::make(int vopc, Node* n1, Node* n2, uint vlen) {
+  const TypeVect* vt = TypeVect::make(T_SHORT, vlen);
+  // This method should not be called for unimplemented vectors.
+  switch (vopc) {
+    case Op_AddVHF: return new AddVHFNode(n1, n2, vt);
+    case Op_SubVHF: return new SubVHFNode(n1, n2, vt);
+    case Op_MulVHF: return new MulVHFNode(n1, n2, vt);
+    case Op_DivVHF: return new DivVHFNode(n1, n2, vt);
+    case Op_AbsVHF: return new AbsVHFNode(n1, vt);
+    case Op_NegVHF: return new NegVHFNode(n1, vt);
+
+  default:
+    fatal("Missed vector creation for '%s'", NodeClassNames[vopc]);
+    return NULL;
+  }
+}
+
 // Also used to check if the code generator
 // supports the vector operation.
 bool VectorNode::implemented(int opc, uint vlen, BasicType bt) {
