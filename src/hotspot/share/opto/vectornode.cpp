@@ -268,6 +268,8 @@ int VectorNode::opcode(int sopc) {
       return Op_AbsVHF;
     case Op_NegI:
       return Op_NegVHF;
+    case Op_FmaF:
+      return Op_FmaVHF;
     default:
       return 0; // Unimplemented
   }
@@ -291,6 +293,18 @@ VectorNode* VectorNode::make(int vopc, Node* n1, Node* n2, uint vlen) {
   }
 }
 
+// Make a vectornode for half float ternary operation
+VectorNode* VectorNode::make(int vopc, Node* n1, Node* n2, Node* n3, uint vlen) {
+  const TypeVect* vt = TypeVect::make(T_SHORT, vlen);
+  // This method should not be called for unimplemented vectors.
+  guarantee(vopc > 0, "Vector for '%s' is not implemented", NodeClassNames[vopc]);
+  switch (vopc) {
+  case Op_FmaVHF: return new FmaVHFNode(n1, n2, n3, vt);
+  default:
+    fatal("Missed vector creation for '%s'", NodeClassNames[vopc]);
+    return NULL;
+  }
+}
 // Also used to check if the code generator
 // supports the vector operation.
 bool VectorNode::implemented(int opc, uint vlen, BasicType bt) {

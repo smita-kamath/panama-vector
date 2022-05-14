@@ -8549,6 +8549,33 @@ instruct vfmaD_mem(vec a, memory b, vec c) %{
   ins_pipe( pipe_slow );
 %}
 
+// a * b + c
+instruct vfmaHF_reg(vecX a, vecX b, vecX c) %{
+  match(Set c (FmaVHF  c (Binary a b)));
+  format %{ "evfmaph $a,$b,$c\t# $c = $a * $b + $c fma packedHF" %}
+  ins_cost(150);
+  ins_encode %{
+    assert(UseFMA, "not enabled");
+    int vlen_enc = vector_length_encoding(this);
+    __ evfmahf($c$$XMMRegister, $a$$XMMRegister, $b$$XMMRegister, $c$$XMMRegister, vlen_enc);
+  %}
+  ins_pipe( pipe_slow );
+%}
+
+// a * b + c
+instruct vfmaHF_mem(vecX a, memory b, vecX c) %{
+  predicate(Matcher::vector_length_in_bytes(n->in(1)) > 8);
+  match(Set c (FmaVHF  c (Binary a (LoadVector b))));
+  format %{ "evfmaph $a,$b,$c\t# $c = $a * $b + $c fma packedHF" %}
+  ins_cost(150);
+  ins_encode %{
+    assert(UseFMA, "not enabled");
+    int vlen_enc = vector_length_encoding(this);
+    __ evfmahf($c$$XMMRegister, $a$$XMMRegister, $b$$Address, $c$$XMMRegister, vlen_enc);
+  %}
+  ins_pipe( pipe_slow );
+%}
+
 // --------------------------------- Vector Multiply Add --------------------------------------
 
 instruct vmuladdS2I_reg_sse(vec dst, vec src1) %{

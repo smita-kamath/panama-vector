@@ -2258,6 +2258,7 @@ bool Matcher::find_shared_visit(MStack& mstack, Node* n, uint opcode, bool& mem_
     case Op_FmaF:
     case Op_FmaVD:
     case Op_FmaVF:
+    case Op_FmaVHF:
     case Op_MacroLogicV:
     case Op_LoadVectorMasked:
     case Op_VectorCmpMasked:

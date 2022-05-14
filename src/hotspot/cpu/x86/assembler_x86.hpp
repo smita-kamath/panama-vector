@@ -542,7 +542,7 @@ class Assembler : public AbstractAssembler  {
     VEX_OPCODE_0F_38 = 0x2,
     VEX_OPCODE_0F_3A = 0x3,
     VEX_OPCODE_MAP5  = 0x5,
-    VEX_OPOCDE_MAP6  = 0x6,
+    VEX_OPCODE_MAP6  = 0x6,
     VEX_OPCODE_MASK  = 0x1F
   };
 
@@ -2213,6 +2213,8 @@ private:
   void vfmadd231ps(XMMRegister dst, XMMRegister nds, XMMRegister src, int vector_len);
   void vfmadd231pd(XMMRegister dst, XMMRegister nds, Address src, int vector_len);
   void vfmadd231ps(XMMRegister dst, XMMRegister nds, Address src, int vector_len);
+  void evfmadd231ph(XMMRegister dst, XMMRegister nds, XMMRegister src, int vector_len);
+  void evfmadd231ph(XMMRegister dst, XMMRegister nds, Address src, int vector_len);
 
   // Divide Packed Floating-Point Values
   void divpd(XMMRegister dst, XMMRegister src);

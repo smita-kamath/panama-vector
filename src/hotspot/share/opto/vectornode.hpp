@@ -78,6 +78,7 @@ class VectorNode : public TypeNode {
   static VectorNode* make(int vopc, Node* n1, Node* n2, Node* n3, const TypeVect* vt);
   static VectorNode* make_mask_node(int vopc, Node* n1, Node* n2, uint vlen, BasicType bt);
   static VectorNode* make(int vopc, Node* n1, Node* n2, uint vlen);
+  static VectorNode* make(int vopc, Node* n1, Node* n2, Node* n3, uint vlen);
 
   static bool is_shift_opcode(int opc);
 
@@ -368,6 +369,14 @@ public:
 class FmaVFNode : public VectorNode {
 public:
   FmaVFNode(Node* in1, Node* in2, Node* in3, const TypeVect* vt) : VectorNode(in1, in2, in3, vt) {}
+  virtual int Opcode() const;
+};
+
+//------------------------------FmaVHFNode-------------------------------------
+// Vector multiply halffloat
+class FmaVHFNode : public VectorNode {
+public:
+  FmaVHFNode(Node* in1, Node* in2, Node* in3, const TypeVect* vt) : VectorNode(in1, in2, in3, vt) {}
   virtual int Opcode() const;
 };
 
