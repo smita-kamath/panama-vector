@@ -1174,6 +1174,12 @@ private:
   void evcvtqq2ps(XMMRegister dst, XMMRegister src, int vector_len);
   void evcvtqq2pd(XMMRegister dst, XMMRegister src, int vector_len);
 
+  // convert vector HF and double
+  void evcvtph2pd(XMMRegister dst, XMMRegister src, int vector_len);
+  void evcvtps2ph(XMMRegister dst, XMMRegister src, int imm8, int vector_len);
+  void evcvtph2ps(XMMRegister dst, XMMRegister src, int vector_len);
+  void evcvtpd2ph(XMMRegister dst, XMMRegister src, int vector_len);
+
   // Evex casts with truncation
   void evpmovwb(XMMRegister dst, XMMRegister src, int vector_len);
   void evpmovdw(XMMRegister dst, XMMRegister src, int vector_len);
@@ -2152,6 +2158,7 @@ private:
   void vaddsd(XMMRegister dst, XMMRegister nds, XMMRegister src);
   void vaddss(XMMRegister dst, XMMRegister nds, Address src);
   void vaddss(XMMRegister dst, XMMRegister nds, XMMRegister src);
+  void evaddsh(XMMRegister dst, XMMRegister nds, XMMRegister src);
   void vdivsd(XMMRegister dst, XMMRegister nds, Address src);
   void vdivsd(XMMRegister dst, XMMRegister nds, XMMRegister src);
   void vdivss(XMMRegister dst, XMMRegister nds, Address src);

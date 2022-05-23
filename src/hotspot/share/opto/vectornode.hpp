@@ -187,7 +187,9 @@ class ReductionNode : public Node {
                _bottom_type(Type::get_const_basic_type(in1->bottom_type()->basic_type())) {}
 
   static ReductionNode* make(int opc, Node *ctrl, Node* in1, Node* in2, BasicType bt);
+  static ReductionNode* make(int opc, Node *ctrl, Node* in1, Node* in2);
   static int  opcode(int opc, BasicType bt);
+  static int  opcode(int opc);
   static bool implemented(int opc, uint vlen, BasicType bt);
   static Node* make_reduction_input(PhaseGVN& gvn, int opc, BasicType bt);
 
@@ -225,6 +227,16 @@ class AddReductionVFNode : public ReductionNode {
 public:
   AddReductionVFNode(Node *ctrl, Node* in1, Node* in2) : ReductionNode(ctrl, in1, in2) {}
   virtual int Opcode() const;
+};
+
+//------------------------------AddReductionVHFNode--------------------------------------
+// Vector add halffloat as a reduction
+class AddReductionVHFNode : public ReductionNode {
+public:
+  AddReductionVHFNode(Node *ctrl, Node* in1, Node* in2) : ReductionNode(ctrl, in1, in2) {}
+  virtual int Opcode() const;
+  virtual const Type* bottom_type() const { return TypeInt::SHORT; }
+  virtual uint ideal_reg() const { return Op_RegF; }
 };
 
 //------------------------------AddReductionVDNode--------------------------------------

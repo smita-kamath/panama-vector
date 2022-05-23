@@ -1737,6 +1737,8 @@
   declare_c2_type(AddReductionVLNode, ReductionNode)                      \
   declare_c2_type(AddVFNode, VectorNode)                                  \
   declare_c2_type(AddReductionVFNode, ReductionNode)                      \
+  declare_c2_type(AddVHFNode, VectorNode)                                 \
+  declare_c2_type(AddReductionVHFNode, ReductionNode)                     \
   declare_c2_type(AddVDNode, VectorNode)                                  \
   declare_c2_type(AddReductionVDNode, ReductionNode)                      \
   declare_c2_type(SubVBNode, VectorNode)                                  \

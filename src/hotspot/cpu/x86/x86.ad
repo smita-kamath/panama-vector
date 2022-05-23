@@ -4776,6 +4776,50 @@ instruct reduction16F(regF dst, legVec src, legVec vtmp1, legVec vtmp2) %{
   ins_pipe( pipe_slow );
 %}
 
+// =======================Half Float Reduction==========================================
+instruct reduction8HF(rRegI dst, vec src2, vec tmp, vec tmp1, vec tmp2) %{
+  predicate(UseAVX > 2);
+  match(Set dst (AddReductionVHF dst src2));
+  effect(TEMP tmp, TEMP tmp1, TEMP tmp2);
+   format %{"movdl    $tmp1, $dst\n\t"
+            "evaddsh  $tmp1,$tmp1,$src2\n\t"
+            "pshuflw  $tmp,$src2,0x01\n\t"
+            "evaddsh  $tmp1,$tmp1,$tmp\n\t"
+            "pshuflw  $tmp,$src2,0x02\n\t"
+            "evaddsh  $tmp1,$tmp1,$tmp\n\t"
+            "pshuflw  $tmp,$src2,0x03\n\t"
+            "evaddsh  $tmp1,$tmp1,$tmp\n\t"
+            "pshufd   $tmp2,$src2, 0x0E\n\t"
+            "evaddsh  $tmp1,$tmp1,$tmp2\n\t"
+            "pshuflw  $tmp,$tmp2,0x01\n\t"
+            "evaddsh  $tmp1,$tmp1,$tmp\n\t"
+            "pshuflw  $tmp,$tmp2,0x02\n\t"
+            "evaddsh  $tmp1,$tmp1,$tmp\n\t"
+            "pshuflw  $tmp,$tmp2,0x03\n\t"
+            "evaddsh  $tmp1,$tmp1,$tmp\t"
+            "movdl    $dst, $tmp1\t! add reductionHF" %}
+  ins_encode %{
+    __ movdl($tmp1$$XMMRegister, $dst$$Register);
+    __ evaddsh($tmp1$$XMMRegister, $tmp1$$XMMRegister, $src2$$XMMRegister);
+    __ pshuflw($tmp$$XMMRegister, $src2$$XMMRegister, 0x01);
+    __ evaddsh($tmp1$$XMMRegister, $tmp1$$XMMRegister, $tmp$$XMMRegister);
+    __ pshuflw($tmp$$XMMRegister, $src2$$XMMRegister, 0x02);
+    __ evaddsh($tmp1$$XMMRegister, $tmp1$$XMMRegister, $tmp$$XMMRegister);
+    __ pshuflw($tmp$$XMMRegister, $src2$$XMMRegister, 0x03);
+    __ evaddsh($tmp1$$XMMRegister, $tmp1$$XMMRegister, $tmp$$XMMRegister);
+    __ pshufd($tmp2$$XMMRegister, $src2$$XMMRegister, 0x0E);
+    __ evaddsh($tmp1$$XMMRegister, $tmp1$$XMMRegister, $tmp2$$XMMRegister);
+    __ pshuflw($tmp$$XMMRegister, $tmp2$$XMMRegister, 0x01);
+    __ evaddsh($tmp1$$XMMRegister, $tmp1$$XMMRegister, $tmp$$XMMRegister);
+    __ pshuflw($tmp$$XMMRegister, $tmp2$$XMMRegister, 0x02);
+    __ evaddsh($tmp1$$XMMRegister, $tmp1$$XMMRegister, $tmp$$XMMRegister);
+    __ pshuflw($tmp$$XMMRegister, $tmp2$$XMMRegister, 0x03);
+    __ evaddsh($tmp1$$XMMRegister, $tmp1$$XMMRegister, $tmp$$XMMRegister);
+    __ movdl($dst$$Register, $tmp1$$XMMRegister);
+  %}
+  ins_pipe( pipe_slow );
+%}
+
 // =======================Double Reduction==========================================
 
 instruct reduction2D(regD dst, vec src, vec vtmp) %{
@@ -7233,6 +7277,53 @@ instruct vcastDtoF_reg(vec dst, vec src) %{
   ins_encode %{
     int vlen_enc = vector_length_encoding(this, $src);
     __ vcvtpd2ps($dst$$XMMRegister, $src$$XMMRegister, vlen_enc);
+  %}
+  ins_pipe( pipe_slow );
+%}
+
+// Convert from Halffloat to other types
+instruct vcvtHFtoD_reg(vec dst, vec src) %{
+  predicate(UseAVX > 2 && VM_Version::supports_avx512_fp16() && Matcher::vector_element_basic_type(n) == T_DOUBLE);
+  match(Set dst (VectorCastS2X src));
+  format %{ "evcvtph2pd   $dst,$src\t! convert 8HF to 8D vector" %}
+  ins_encode %{
+    int vlen_enc = vector_length_encoding(this, $src);
+    __ evcvtph2pd($dst$$XMMRegister, $src$$XMMRegister, vlen_enc);
+  %}
+  ins_pipe( pipe_slow );
+%}
+
+instruct vcvtHFtoF_reg(vec dst, vec src) %{
+  predicate(UseAVX > 2 && Matcher::vector_element_basic_type(n) == T_FLOAT);
+  match(Set dst (VectorCastS2X src));
+  format %{ "evcvtph2ps   $dst,$src\t! convert 8HF to 8F vector" %}
+  ins_encode %{
+    int vlen_enc = vector_length_encoding(this, $src);
+    __ evcvtph2ps($dst$$XMMRegister, $src$$XMMRegister, vlen_enc);
+  %}
+  ins_pipe( pipe_slow );
+%}
+
+// Convert from other types to Halffloat
+instruct vcvtFtoHF_reg(vec dst, vec src) %{
+  predicate(UseAVX > 2 && Matcher::vector_element_basic_type(n) == T_SHORT);
+  match(Set dst (VectorCastF2X src));
+  format %{ "evcvtps2ph   $dst,$src\t! convert 8F to 8HF vector" %}
+  ins_encode %{
+    int midx = 0;
+    int vlen_enc = vector_length_encoding(this, $src);
+    __ evcvtps2ph($dst$$XMMRegister, $src$$XMMRegister, midx, vlen_enc);
+  %}
+  ins_pipe( pipe_slow );
+%}
+
+instruct vcvtDtoHF_reg(vec dst, vec src) %{
+  predicate(UseAVX > 2 && VM_Version::supports_avx512_fp16() && Matcher::vector_element_basic_type(n) == T_SHORT);
+  match(Set dst (VectorCastD2X src));
+  format %{ "evcvtpd2ph   $dst,$src\t! convert 8D to 8HF vector" %}
+  ins_encode %{
+    int vlen_enc = vector_length_encoding(this, $src);
+    __ evcvtpd2ph($dst$$XMMRegister, $src$$XMMRegister, vlen_enc);
   %}
   ins_pipe( pipe_slow );
 %}

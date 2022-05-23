@@ -1068,6 +1068,21 @@ int ReductionNode::opcode(int opc, BasicType bt) {
   return vopc;
 }
 
+//Haffloat reduction nodes.
+int ReductionNode::opcode(int opc) {
+  int vopc = opc;
+  switch (opc) {
+    case Op_AddI:
+      vopc = Op_AddReductionVHF;
+      break;
+    case Op_MulI:
+      vopc = Op_MulReductionVF;
+      break;
+    default: ShouldNotReachHere(); return 0;
+  }
+  return vopc;
+}
+
 // Return the appropriate reduction node.
 ReductionNode* ReductionNode::make(int opc, Node *ctrl, Node* n1, Node* n2, BasicType bt) {
 
@@ -1092,6 +1107,17 @@ ReductionNode* ReductionNode::make(int opc, Node *ctrl, Node* n1, Node* n2, Basi
   case Op_XorReductionV:  return new XorReductionVNode(ctrl, n1, n2);
   default:
     assert(false, "unknown node: %s", NodeClassNames[vopc]);
+    return NULL;
+  }
+}
+
+// Return the appropriate reduction node for halffloat
+ReductionNode* ReductionNode::make(int vopc, Node *ctrl, Node* n1, Node* n2) {
+  switch (vopc) {
+  case Op_AddReductionVHF: return new AddReductionVHFNode(ctrl, n1, n2);
+  case Op_MulReductionVF: return new MulReductionVFNode(ctrl, n1, n2);
+  default:
+    assert(false,"Missed vector creation for '%s'", NodeClassNames[vopc]);
     return NULL;
   }
 }
@@ -1183,6 +1209,7 @@ Node* ReductionNode::make_reduction_input(PhaseGVN& gvn, int opc, BasicType bt) 
     case Op_AddReductionVI: // fallthrough
     case Op_AddReductionVL: // fallthrough
     case Op_AddReductionVF: // fallthrough
+    case Op_AddReductionVHF:// fallthrough
     case Op_AddReductionVD:
     case Op_OrReductionV:
     case Op_XorReductionV:
